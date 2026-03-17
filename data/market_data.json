@@ -5,70 +5,70 @@
             "price_usd": 252.82,
             "change_pct": 1.08,
             "ratio": 20,
-            "last_update": "17/03 12:55"
+            "last_update": "17/03 13:00"
         },
         "AMZN": {
             "name": "Amazon",
             "price_usd": 211.74,
             "change_pct": 1.96,
             "ratio": 144,
-            "last_update": "17/03 12:55"
+            "last_update": "17/03 13:00"
         },
         "BABA": {
             "name": "Alibaba",
             "price_usd": 136.71,
             "change_pct": 1.11,
             "ratio": 9,
-            "last_update": "17/03 12:55"
+            "last_update": "17/03 13:00"
         },
         "KO": {
             "name": "Coca-Cola",
             "price_usd": 77.82,
             "change_pct": 0.62,
             "ratio": 5,
-            "last_update": "17/03 12:55"
-        },
-        "MELI": {
-            "name": "Mercado Libre",
-            "price_usd": 1732.33,
-            "change_pct": 3.73,
-            "ratio": 120,
-            "last_update": "17/03 12:55"
+            "last_update": "17/03 13:00"
         },
         "MSFT": {
             "name": "Microsoft",
             "price_usd": 399.95,
             "change_pct": 1.11,
             "ratio": 30,
-            "last_update": "17/03 12:55"
+            "last_update": "17/03 13:00"
         },
         "NVDA": {
             "name": "NVIDIA",
             "price_usd": 183.22,
             "change_pct": 1.65,
             "ratio": 48,
-            "last_update": "17/03 12:55"
+            "last_update": "17/03 13:00"
         },
         "TSLA": {
             "name": "Tesla",
             "price_usd": 395.56,
             "change_pct": 1.11,
             "ratio": 15,
-            "last_update": "17/03 12:55"
+            "last_update": "17/03 13:00"
         },
         "V": {
             "name": "Visa",
             "price_usd": 310.11,
             "change_pct": 0.97,
             "ratio": 18,
-            "last_update": "17/03 12:55"
+            "last_update": "17/03 13:00"
         },
         "VIST": {
             "name": "Vista Energy",
             "price_usd": 65.69,
             "change_pct": 1.47,
             "ratio": 3,
-            "last_update": "17/03 12:55"
+            "last_update": "17/03 13:00"
+        },
+        "WMT": {
+            "name": "Walmart",
+            "price_usd": 125.99,
+            "change_pct": -0.42,
+            "ratio": 18,
+            "last_update": "17/03 13:00"
         }
     }
 }
