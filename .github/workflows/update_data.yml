@@ -1,7 +1,7 @@
 name: Actualizar datos de mercado
 on:
   schedule:
-    - cron: "0 22 * * 1-5" # 19:00 hora Argentina
+    - cron: "0 22 * * 1-5" 
   workflow_dispatch:
 permissions:
   contents: write
@@ -14,16 +14,13 @@ jobs:
         with:
           python-version: "3.11"
       - name: Instalar dependencias
-        run: pip install yfinance pandas --upgrade  # Quitamos pandas_ta que daba error
-
+        run: pip install yfinance pandas --upgrade  # Limpio: sin pandas_ta
       - name: Descargar datos
-        run: python fetch_data.py  # Asegúrate de que el archivo se llame así y esté en la raíz
-      - name: Ejecutar motor de datos
-        run: python fetch_data.py  # Corregido: ya no busca en /scripts/ ni en /src/
-      - name: Guardar resultados
+        run: python fetch_data.py
+      - name: Guardar cambios
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/market_data.json
-          git commit -m "Precios actualizados" || exit 0
+          git commit -m "Update prices" || exit 0
           git push
