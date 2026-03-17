@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>CEDEAR Dashboard 2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; }
+        .card { background: #1e293b; border: 1px solid #334155; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-blue-400">CEDEAR Dashboard 2</h1>
+                <p id="ccl-rate" class="text-sm text-gray-400">Cargando Dólar CCL...</p>
+            </div>
+            <div class="w-full md:w-64">
+                <input type="text" id="searchInput" placeholder="Buscar ticker (AAPL, KO...)" 
+                class="w-full p-2 rounded bg-slate-800 border border-slate-700 focus:outline-none focus:border-blue-500">
+            </div>
+        </header>
+
+        <div id="grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            </div>
+    </div>
+
+    <script>
+        let cclPrice = 0;
+        let marketData = {};
+
+        // 1. Obtener Dólar CCL en tiempo real
+        async function fetchDollar() {
+            try {
+                const res = await fetch('https://dolarapi.com/v1/dolares/contadoconliqui');
+                const data = await res.json();
+                cclPrice = data.compra;
+                document.getElementById('ccl-rate').innerText = `Cotización CCL: $${cclPrice.toLocaleString('es-AR')}`;
+                renderCards();
+            } catch (e) {
+                console.error("Error obteniendo dólar", e);
+            }
+        }
+
+        // 2. Cargar datos del JSON generado por Python
+        async function loadData() {
+            const res = await fetch('data/market_data.json');
+            marketData = await res.json();
+            renderCards();
+        }
+
+        // 3. Dibujar las tarjetas
+        function renderCards(filter = "") {
+            const container = document.getElementById('grid-container');
+            container.innerHTML = "";
+            
+            Object.keys(marketData).forEach(ticker => {
+                if (!ticker.toLowerCase().includes(filter.toLowerCase())) return;
+
+                const asset = marketData[ticker];
+                const priceARS = cclPrice > 0 ? (asset.price_usd * asset.ratio * cclPrice) : 0;
+                
+                const card = document.createElement('div');
+                card.className = "card p-5 rounded-xl shadow-lg";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xl font-bold">${ticker}</span>
+                        <span class="${asset.change >= 0 ? 'text-green-400' : 'text-red-400'} font-medium">
+                            ${asset.change}%
+                        </span>
+                    </div>
+                    <div class="text-xs text-gray-400 mb-4">${asset.name}</div>
+                    <div class="flex justify-between border-t border-slate-700 pt-3">
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase">Precio USA</p>
+                            <p class="text-lg font-semibold text-white">USD ${asset.price_usd}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-blue-500 uppercase font-bold">Estimado ARS</p>
+                            <p class="text-lg font-semibold text-blue-400">
+                                ${priceARS > 0 ? '$' + Math.round(priceARS).toLocaleString('es-AR') : '---'}
+                            </p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Evento Buscador
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            renderCards(e.target.value);
+        });
+
+        fetchDollar();
+        loadData();
+    </script>
+</body>
+</html>
