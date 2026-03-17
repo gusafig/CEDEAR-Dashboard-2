@@ -13,8 +13,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Instalar herramientas
-        run: pip install yfinance pandas pandas_ta --upgrade
+      - name: Instalar dependencias
+        run: pip install yfinance pandas --upgrade  # Quitamos pandas_ta que daba error
+
+      - name: Descargar datos
+        run: python fetch_data.py  # Asegúrate de que el archivo se llame así y esté en la raíz
       - name: Ejecutar motor de datos
         run: python fetch_data.py  # Corregido: ya no busca en /scripts/ ni en /src/
       - name: Guardar resultados
