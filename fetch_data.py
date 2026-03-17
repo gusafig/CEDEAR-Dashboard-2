@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime
 
-# Ratios extraídos de tu PDF
+# Ratios actualizados del PDF
 CEDEARS = {
     "AAPL": {"name": "Apple", "ratio": 20},
     "AMZN": {"name": "Amazon", "ratio": 144},
@@ -14,12 +14,13 @@ CEDEARS = {
     "NVDA": {"name": "NVIDIA", "ratio": 48},
     "TSLA": {"name": "Tesla", "ratio": 15},
     "V":    {"name": "Visa", "ratio": 18},
-    "VIST": {"name": "Vista Energy", "ratio": 3}
+    "VIST": {"name": "Vista Energy", "ratio": 3},
+    "WMT":  {"name": "Walmart", "ratio": 18}
 }
 
 def main():
     tickers = list(CEDEARS.keys())
-    # Descargamos datos del último año
+    # Descargamos solo lo necesario (evita errores)
     data = yf.download(tickers, period="1y", interval="1d", group_by='ticker')
     
     results = {}
@@ -44,7 +45,6 @@ def main():
     os.makedirs("data", exist_ok=True)
     with open("data/market_data.json", "w") as f:
         json.dump({"tickers": results}, f, indent=4)
-    print("¡Datos guardados con éxito!")
 
 if __name__ == "__main__":
     main()
