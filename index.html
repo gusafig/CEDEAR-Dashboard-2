@@ -2,27 +2,33 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDEAR Dashboard 2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: #e2e8f0; }
-        .card { background: #1e293b; border: 1px solid #334155; }
+        body { background-color: #0f172a; color: #f1f5f9; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .ticker-card:hover { border-color: #3b82f6; transform: translateY(-2px); transition: all 0.2s; }
     </style>
 </head>
-<body class="p-4 md:p-8">
-    <div class="max-w-6xl mx-auto">
-        <header class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+<body class="p-6">
+    <div class="max-w-7xl mx-auto">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
             <div>
-                <h1 class="text-3xl font-bold text-blue-400">CEDEAR Dashboard 2</h1>
-                <p id="ccl-rate" class="text-sm text-gray-400">Cargando Dólar CCL...</p>
+                <h1 class="text-4xl font-extrabold text-blue-500">CEDEAR Dashboard 2</h1>
+                <div class="flex items-center gap-3 mt-2">
+                    <span id="ccl-tag" class="bg-blue-900 text-blue-200 px-3 py-1 rounded-full text-sm font-bold tracking-tight">CCL: Cargando...</span>
+                    <span class="text-slate-400 text-sm italic">BYMA & NYSE Data</span>
+                </div>
             </div>
-            <div class="w-full md:w-64">
-                <input type="text" id="searchInput" placeholder="Buscar ticker (AAPL, KO...)" 
-                class="w-full p-2 rounded bg-slate-800 border border-slate-700 focus:outline-none focus:border-blue-500">
+            
+            <div class="relative w-full md:w-96">
+                <input type="text" id="searchInput" placeholder="Buscar empresa o ticker (ej: AAPL, Disney)..." 
+                class="w-full bg-slate-800 border border-slate-700 rounded-lg py-3 px-5 focus:ring-2 focus:ring-blue-500 outline-none">
             </div>
         </header>
 
-        <div id="grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             </div>
     </div>
 
@@ -30,57 +36,58 @@
         let cclPrice = 0;
         let marketData = {};
 
-        // 1. Obtener Dólar CCL en tiempo real
-        async function fetchDollar() {
+        async function init() {
+            // 1. Obtener Dólar CCL real
             try {
                 const res = await fetch('https://dolarapi.com/v1/dolares/contadoconliqui');
-                const data = await res.json();
-                cclPrice = data.compra;
-                document.getElementById('ccl-rate').innerText = `Cotización CCL: $${cclPrice.toLocaleString('es-AR')}`;
-                renderCards();
-            } catch (e) {
-                console.error("Error obteniendo dólar", e);
-            }
+                const d = await res.json();
+                cclPrice = d.compra;
+                document.getElementById('ccl-tag').innerText = `CCL: $${Math.round(cclPrice)}`;
+            } catch(e) { console.error("DolarApi falló"); }
+
+            // 2. Cargar datos de mercado
+            try {
+                const res = await fetch('data/market_data.json');
+                marketData = await res.json();
+                render();
+            } catch(e) { console.error("No se encontró market_data.json"); }
         }
 
-        // 2. Cargar datos del JSON generado por Python
-        async function loadData() {
-            const res = await fetch('data/market_data.json');
-            marketData = await res.json();
-            renderCards();
-        }
-
-        // 3. Dibujar las tarjetas
-        function renderCards(filter = "") {
-            const container = document.getElementById('grid-container');
+        function render(filter = "") {
+            const container = document.getElementById('dashboard-grid');
             container.innerHTML = "";
             
             Object.keys(marketData).forEach(ticker => {
-                if (!ticker.toLowerCase().includes(filter.toLowerCase())) return;
-
                 const asset = marketData[ticker];
+                const searchStr = (ticker + asset.name).toLowerCase();
+                
+                if (filter && !searchStr.includes(filter.toLowerCase())) return;
+
                 const priceARS = cclPrice > 0 ? (asset.price_usd * asset.ratio * cclPrice) : 0;
                 
                 const card = document.createElement('div');
-                card.className = "card p-5 rounded-xl shadow-lg";
+                card.className = "glass p-5 rounded-2xl ticker-card shadow-xl flex flex-col justify-between";
                 card.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-xl font-bold">${ticker}</span>
-                        <span class="${asset.change >= 0 ? 'text-green-400' : 'text-red-400'} font-medium">
-                            ${asset.change}%
-                        </span>
-                    </div>
-                    <div class="text-xs text-gray-400 mb-4">${asset.name}</div>
-                    <div class="flex justify-between border-t border-slate-700 pt-3">
-                        <div>
-                            <p class="text-xs text-gray-500 uppercase">Precio USA</p>
-                            <p class="text-lg font-semibold text-white">USD ${asset.price_usd}</p>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <h2 class="text-2xl font-bold">${ticker}</h2>
+                            <span class="font-mono ${asset.change >= 0 ? 'text-emerald-400' : 'text-red-400'}">
+                                ${asset.change > 0 ? '+' : ''}${asset.change}%
+                            </span>
                         </div>
-                        <div class="text-right">
-                            <p class="text-xs text-blue-500 uppercase font-bold">Estimado ARS</p>
-                            <p class="text-lg font-semibold text-blue-400">
-                                ${priceARS > 0 ? '$' + Math.round(priceARS).toLocaleString('es-AR') : '---'}
-                            </p>
+                        <p class="text-xs text-slate-400 truncate mb-4">${asset.name}</p>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-end border-b border-slate-700 pb-2">
+                            <span class="text-[10px] text-slate-500 uppercase">Precio USA</span>
+                            <span class="text-xl font-semibold">USD ${asset.price_usd}</span>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <span class="text-[10px] text-blue-400 uppercase font-bold">Est. BYMA (ARS)</span>
+                            <span class="text-xl font-bold text-blue-400">
+                                $${priceARS ? Math.round(priceARS).toLocaleString('es-AR') : '---'}
+                            </span>
                         </div>
                     </div>
                 `;
@@ -88,13 +95,8 @@
             });
         }
 
-        // Evento Buscador
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            renderCards(e.target.value);
-        });
-
-        fetchDollar();
-        loadData();
+        document.getElementById('searchInput').addEventListener('input', (e) => render(e.target.value));
+        init();
     </script>
 </body>
 </html>
